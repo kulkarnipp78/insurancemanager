@@ -1,0 +1,45 @@
+name: Build, sign, and push container image
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-sign-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Configure Git
+        run: |
+          git config --global user.email "kulkarni_pp@rediffmail.com"
+          git config --global user.name "kulkarnipp78"
+        env:
+          CI: true
+
+      - name: azure login
+        run: |
+          az login --use-device-code
+
+      - uses: azure/docker-login@v1
+        with:
+          login-server: ${{ secrets.ACR_LOGIN_SERVER }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: Validate YAML files with Spectral
+        run: |
+          docker run --rm -v "$(pwd):/mnt" stoplight/spectral lint /mnt/**/*.yaml --ruleset /mnt/spectral.yml 
+
+      - name: maven install
+        run:
+          mvn clean package
+
+      - name: Build the image
+        run: |
+          docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/insurancemanager:1 .
+          docker push ${{ secrets.ACR_LOGIN_SERVER }}/insurancemanager:1
+            
