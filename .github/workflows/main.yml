@@ -58,4 +58,4 @@ jobs:
           # Working directory
           working-directory: ./WebAppDemo
           # Generate latex documentation
-          enable-latex: True
+          enable-latex: false
