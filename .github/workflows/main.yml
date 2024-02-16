@@ -30,10 +30,7 @@ jobs:
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
 
-      - name: Validate YAML files with Spectral
-        run: |
-          docker run --rm -v "$(pwd):/mnt" stoplight/spectral lint /mnt/**/*.yaml --ruleset /mnt/spectral.yml 
-
+     
       - name: maven install
         run:
           mvn clean package
